@@ -18,10 +18,10 @@ def notebook_details(request, notebook_id):
     else:
         other_notebooks = notebook.sharednotebook_set.exclude(
             pk=notebook.id)
-    liked = False
-    if request.user.is_authenticated:
-        if notebook.notebooklike_set.filter(oh_member=request.user.oh_member):
-            liked = True
+    liked = bool(
+        request.user.is_authenticated
+        and notebook.notebooklike_set.filter(oh_member=request.user.oh_member)
+    )
     format_notebook = nbformat.reads(notebook.notebook_content,
                                      as_version=nbformat.NO_CONVERT)
     html_exporter = nbconvert.HTMLExporter()
@@ -77,7 +77,7 @@ def export_notebook(request, notebook_id):
 
 def open_notebook_hub(request, notebook_id):
     notebook = SharedNotebook.objects.get(pk=notebook_id)
-    nbview_session_key = 'nb-view-{}'.format(notebook_id)
+    nbview_session_key = f'nb-view-{notebook_id}'
     if not request.session.get(nbview_session_key):
         request.session[nbview_session_key] = True
         notebook.views += 1

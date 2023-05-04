@@ -43,15 +43,14 @@ def index(request):
     """
     if request.user.is_authenticated:
         return redirect('/notebooks')
-    else:
-        latest_notebooks = SharedNotebook.objects.filter(
-            master_notebook=None).order_by('-views')[:5]
-        data_sources = get_all_data_sources()[:6]
-        context = {'oh_proj_page': settings.OH_ACTIVITY_PAGE,
-                   'latest_notebooks': latest_notebooks,
-                   'data_sources': data_sources}
+    latest_notebooks = SharedNotebook.objects.filter(
+        master_notebook=None).order_by('-views')[:5]
+    data_sources = get_all_data_sources()[:6]
+    context = {'oh_proj_page': settings.OH_ACTIVITY_PAGE,
+               'latest_notebooks': latest_notebooks,
+               'data_sources': data_sources}
 
-        return render(request, 'main/index.html', context=context)
+    return render(request, 'main/index.html', context=context)
 
 
 def data_source_index(request):
@@ -82,9 +81,7 @@ def complete(request):
     # Exchange code for token.
     # This creates an OpenHumansMember and associated user account.
     code = request.GET.get('code', '')
-    oh_member = oh_code_to_member(code=code)
-
-    if oh_member:
+    if oh_member := oh_code_to_member(code=code):
         # Log in the user.
         user = oh_member.user
         login(request, user,
@@ -198,7 +195,7 @@ def edit_notebook(request, notebook_id):
         notebook.data_sources = json.dumps(data_sources)
         notebook.updated_at = arrow.now().format()
         notebook.save()
-        messages.info(request, 'Updated {}!'.format(notebook.notebook_name))
+        messages.info(request, f'Updated {notebook.notebook_name}!')
         return redirect("/dashboard")
     else:
         context = {'description': notebook.description,
@@ -218,7 +215,7 @@ def delete_notebook(request, notebook_id):
             messages.warning(request, 'Permission denied!')
             return redirect("/")
         notebook.delete()
-        messages.info(request, 'Deleted {}!'.format(notebook.notebook_name))
+        messages.info(request, f'Deleted {notebook.notebook_name}!')
         return redirect("/dashboard")
 
 
@@ -239,7 +236,7 @@ def notebook_index(request):
     if order_variable == 'likes':
         notebook_list = notebook_list.annotate(
             likes=Count('notebooklike'))
-    notebook_list = notebook_list.order_by('-{}'.format(order_variable))
+    notebook_list = notebook_list.order_by(f'-{order_variable}')
     notebooks = paginate_items(notebook_list, request.GET.get('page'))
     return render(request,
                   'main/notebook_index.html',
@@ -264,7 +261,7 @@ def search_notebooks(request):
     if order_variable == 'likes':
         notebook_list = notebook_list.annotate(
             likes=Count('notebooklike'))
-    notebook_list = notebook_list.order_by('-{}'.format(order_variable))
+    notebook_list = notebook_list.order_by(f'-{order_variable}')
     notebooks = paginate_items(notebook_list, request.GET.get('page'))
     return render(request,
                   'main/search.html',
@@ -275,29 +272,30 @@ def search_notebooks(request):
 
 def notebook_by_source(request):
     source_name = request.GET.get('source')
-    notebook_list = []
     notebooks = SharedNotebook.objects.filter(
                         data_sources__contains=source_name,
                         master_notebook=None)
     notebooks = notebooks.annotate(
         likes=Count('notebooklike'))
-    for notebook in notebooks:
-        notebook_list.append(
-            {
-                'name': notebook.notebook_name,
-                'user': notebook.oh_member.oh_username,
-                'description': notebook.description,
-                'views': notebook.views,
-                'likes': notebook.likes,
-                'details_url': request.build_absolute_uri(
-                    reverse('notebook-details', args=[notebook.id])),
-                'preview_url': request.build_absolute_uri(
-                    reverse('render-notebook', args=[notebook.id])),
-                'open_url': request.build_absolute_uri(
-                    reverse('open-notebook', args=[notebook.id])
-                )
-            }
-        )
+    notebook_list = [
+        {
+            'name': notebook.notebook_name,
+            'user': notebook.oh_member.oh_username,
+            'description': notebook.description,
+            'views': notebook.views,
+            'likes': notebook.likes,
+            'details_url': request.build_absolute_uri(
+                reverse('notebook-details', args=[notebook.id])
+            ),
+            'preview_url': request.build_absolute_uri(
+                reverse('render-notebook', args=[notebook.id])
+            ),
+            'open_url': request.build_absolute_uri(
+                reverse('open-notebook', args=[notebook.id])
+            ),
+        }
+        for notebook in notebooks
+    ]
     notebook_list = sorted(
         notebook_list,
         key=lambda k: k['views'], reverse=True)

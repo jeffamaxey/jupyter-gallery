@@ -10,6 +10,7 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/2.0/ref/settings/
 """
 
+
 import os
 import dj_database_url
 from env_tools import apply_env
@@ -25,9 +26,9 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 SECRET_KEY = os.getenv('SECRET_KEY', 'yoursecretkeyhere')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = False if os.getenv('DEBUG', '').lower() == 'false' else True
+DEBUG = os.getenv('DEBUG', '').lower() != 'false'
 
-REMOTE = True if os.getenv('REMOTE', '').lower() == 'true' else False
+REMOTE = os.getenv('REMOTE', '').lower() == 'true'
 if REMOTE:
     SECURE_SSL_REDIRECT = True
 
@@ -35,8 +36,11 @@ ALLOWED_HOSTS = ['*']
 
 HEROKUCONFIG_APP_NAME = os.getenv('HEROKUCONFIG_APP_NAME', '')
 
-DEFAULT_BASE_URL = ('https://{}.herokuapp.com'.format(HEROKUCONFIG_APP_NAME) if
-                    REMOTE else 'http://127.0.0.1:5000')
+DEFAULT_BASE_URL = (
+    f'https://{HEROKUCONFIG_APP_NAME}.herokuapp.com'
+    if REMOTE
+    else 'http://127.0.0.1:5000'
+)
 
 OPENHUMANS_APP_BASE_URL = os.getenv('APP_BASE_URL', DEFAULT_BASE_URL)
 if OPENHUMANS_APP_BASE_URL[-1] == "/":
@@ -48,10 +52,10 @@ OPENHUMANS_CLIENT_SECRET = os.getenv('OH_CLIENT_SECRET')
 OH_ACTIVITY_PAGE = os.getenv('OH_ACTIVITY_PAGE')
 OPENHUMANS_OH_BASE_URL = 'https://www.openhumans.org'
 
-OH_API_BASE = OPENHUMANS_OH_BASE_URL + '/api/direct-sharing'
-OH_DIRECT_UPLOAD = OH_API_BASE + '/project/files/upload/direct/'
-OH_DIRECT_UPLOAD_COMPLETE = OH_API_BASE + '/project/files/upload/complete/'
-OH_DELETE_FILES = OH_API_BASE + '/project/files/delete/'
+OH_API_BASE = f'{OPENHUMANS_OH_BASE_URL}/api/direct-sharing'
+OH_DIRECT_UPLOAD = f'{OH_API_BASE}/project/files/upload/direct/'
+OH_DIRECT_UPLOAD_COMPLETE = f'{OH_API_BASE}/project/files/upload/complete/'
+OH_DELETE_FILES = f'{OH_API_BASE}/project/files/delete/'
 
 JUPYTERHUB_BASE_URL = os.getenv('JUPYTERHUB_BASE_URL',
                                 'http://localhost:8888')

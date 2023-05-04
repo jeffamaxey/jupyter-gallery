@@ -76,9 +76,9 @@ class GeneralTest(TestCase):
         )
         self.notebook.save()
         response = c.post(
-                    '/add-comment/{}/'.format(self.notebook.id),
-                    {'comment_text': 'stupid comment'},
-                    follow=True
+            f'/add-comment/{self.notebook.id}/',
+            {'comment_text': 'stupid comment'},
+            follow=True,
         )
         self.assertEqual(response.status_code, 200)
         self.assertEqual(len(NotebookComment.objects.all()), 1)
@@ -101,13 +101,13 @@ class GeneralTest(TestCase):
         c.login(username=self.user.username, password='foobar')
 
         response = c.post(
-            '/edit-notebook/{}/'.format(self.notebook.id),
+            f'/edit-notebook/{self.notebook.id}/',
             {
                 'description': 'edited',
                 'tags': 'notfoo, notbar',
                 'data_sources': 'new_data_source',
             },
-            follow=True
+            follow=True,
         )
         self.assertEqual(response.status_code, 200)
         updated_nb = SharedNotebook.objects.get(pk=self.notebook.pk)

@@ -36,10 +36,7 @@ class SharedNotebook(models.Model):
         return ",".join(json.loads(self.tags)) if self.tags else ''
 
     def get_data_sources(self):
-        if self.data_sources:
-            return ",".join(json.loads(self.data_sources))
-        else:
-            return ''
+        return ",".join(json.loads(self.data_sources)) if self.data_sources else ''
 
     def get_tags_json(self):
         return json.loads(self.tags)

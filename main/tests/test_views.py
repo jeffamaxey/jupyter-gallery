@@ -47,14 +47,14 @@ class ViewTest(TestCase):
     def test_open_notebook(self):
         c = Client()
         self.assertEqual(self.notebook.views, 123)
-        c.get('/open-notebook/{}/'.format(self.notebook.id))
+        c.get(f'/open-notebook/{self.notebook.id}/')
         updated_nb = SharedNotebook.objects.get(pk=self.notebook.id)
         self.assertEqual(updated_nb.views, 124)
-        c.get('/open-notebook/{}/'.format(self.notebook.id))
+        c.get(f'/open-notebook/{self.notebook.id}/')
         updated_nb = SharedNotebook.objects.get(pk=self.notebook.id)
         self.assertEqual(updated_nb.views, 124)
         c.login(username=self.user.username, password='foobar')
-        c.get('/open-notebook/{}/'.format(self.notebook.id))
+        c.get(f'/open-notebook/{self.notebook.id}/')
         self.assertEqual(updated_nb.views, 124)
 
     def test_shared(self):
@@ -110,16 +110,16 @@ class ViewTest(TestCase):
         c = Client()
         c.login(username=self.user.username, password='foobar')
         self.assertEqual(len(SharedNotebook.objects.all()), 1)
-        c.post('/delete-notebook/{}/'.format(self.notebook.pk))
+        c.post(f'/delete-notebook/{self.notebook.pk}/')
         self.assertEqual(len(SharedNotebook.objects.all()), 0)
 
     def test_notebook_like(self):
         c = Client()
         c.login(username=self.user.username, password='foobar')
         self.assertEqual(len(NotebookLike.objects.all()), 0)
-        c.post('/like-notebook/{}/'.format(self.notebook.pk))
+        c.post(f'/like-notebook/{self.notebook.pk}/')
         self.assertEqual(len(NotebookLike.objects.all()), 1)
-        c.post('/like-notebook/{}/'.format(self.notebook.pk))
+        c.post(f'/like-notebook/{self.notebook.pk}/')
         self.assertEqual(len(NotebookLike.objects.all()), 0)
 
     @vcr.use_cassette('main/tests/fixtures/suggested_sources.yaml',

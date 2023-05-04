@@ -5,9 +5,9 @@ from .models import SharedNotebook
 
 @receiver(post_delete, sender=SharedNotebook)
 def my_handler(sender, instance, **kwargs):
-    notebooks = SharedNotebook.objects.filter(
-                notebook_name=instance.notebook_name).order_by('created_at')
-    if notebooks:
+    if notebooks := SharedNotebook.objects.filter(
+        notebook_name=instance.notebook_name
+    ).order_by('created_at'):
         master_nb = notebooks[0]
         for notebook in notebooks[1:]:
             notebook.master_notebook = master_nb

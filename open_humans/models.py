@@ -7,10 +7,10 @@ from django.db import models
 import requests
 
 OH_BASE_URL = settings.OPENHUMANS_OH_BASE_URL
-OH_API_BASE = OH_BASE_URL + '/api/direct-sharing'
-OH_DELETE_FILES = OH_API_BASE + '/project/files/delete/'
-OH_DIRECT_UPLOAD = OH_API_BASE + '/project/files/upload/direct/'
-OH_DIRECT_UPLOAD_COMPLETE = OH_API_BASE + '/project/files/upload/complete/'
+OH_API_BASE = f'{OH_BASE_URL}/api/direct-sharing'
+OH_DELETE_FILES = f'{OH_API_BASE}/project/files/delete/'
+OH_DIRECT_UPLOAD = f'{OH_API_BASE}/project/files/upload/direct/'
+OH_DIRECT_UPLOAD_COMPLETE = f'{OH_API_BASE}/project/files/upload/complete/'
 
 OPENHUMANS_APP_BASE_URL = settings.OPENHUMANS_APP_BASE_URL
 
@@ -54,22 +54,20 @@ class OpenHumansMember(models.Model):
     @classmethod
     def create(cls, oh_id, oh_username,
                access_token, refresh_token, expires_in):
-        new_username = make_unique_username(
-            base='{}_openhumans'.format(oh_id))
+        new_username = make_unique_username(base=f'{oh_id}_openhumans')
         new_user = User(username=new_username)
         new_user.save()
-        oh_member = cls(
+        return cls(
             user=new_user,
             oh_id=oh_id,
             oh_username=oh_username,
             access_token=access_token,
             refresh_token=refresh_token,
-            token_expires=cls.get_expiration(expires_in))
-        return oh_member
+            token_expires=cls.get_expiration(expires_in),
+        )
 
     def __str__(self):
-        return "<OpenHumansMember(oh_id='{}')>".format(
-            self.oh_id)
+        return f"<OpenHumansMember(oh_id='{self.oh_id}')>"
 
     def get_access_token(self,
                          client_id=settings.OPENHUMANS_CLIENT_ID,
